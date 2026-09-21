@@ -1,7 +1,0 @@
-LICENSE
-pyproject.toml
-jev_server.egg-info/PKG-INFO
-jev_server.egg-info/SOURCES.txt
-jev_server.egg-info/dependency_links.txt
-jev_server.egg-info/requires.txt
-jev_server.egg-info/top_level.txt
