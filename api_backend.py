@@ -1,11 +1,19 @@
 """OpenAI-compatible API backend: logit readout via top_logprobs.
 
-Works with LM Studio, ollama, any OpenAI-compatible server that supports logprobs.
-Matches openjev's approach: one completion call per question with max_tokens=1,
-reads top_logprobs at the boundary position, normalizes over supplied options.
+Works with ollama or any OpenAI-compatible server that returns logprobs.
+Note: LM Studio does not support logprobs (returns null) — use ollama or OpenAI.
+Thinking models (Qwen3.x, DeepSeek-R1) suppress thinking via system prompt; if
+that fails (model ignores it), the boundary token will be wrong and scores degrade.
+
+Uses A/B/C/... letter labels in the prompt so each option maps to one guaranteed
+single token — avoids BPE subword issues with option text like "Intake" → "Int".
 """
 import time
 import math
+
+LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+NO_THINK_SYSTEM = "/no_think\nRespond with only the letter of the correct option. No explanation."
 
 
 class APIPredictor:
@@ -21,12 +29,18 @@ class APIPredictor:
         t0 = time.time()
 
         for q in rec["questions"]:
-            prompt = f"{state}\n\n{q['instr']}\n"
             options = q["options"]
+            labels = LETTERS[:len(options)]
+
+            option_lines = "\n".join(f"{lbl}: {opt}" for lbl, opt in zip(labels, options))
+            prompt = f"{state}\n\n{q['instr']}\n\n{option_lines}\n\nAnswer (letter only):"
 
             resp = self.client.chat.completions.create(
                 model=self.model,
-                messages=[{"role": "user", "content": prompt}],
+                messages=[
+                    {"role": "system", "content": NO_THINK_SYSTEM},
+                    {"role": "user", "content": prompt},
+                ],
                 max_tokens=1,
                 temperature=0,
                 logprobs=True,
@@ -34,19 +48,16 @@ class APIPredictor:
             )
             total_tokens += resp.usage.prompt_tokens if resp.usage else 0
 
-            top = resp.choices[0].logprobs.content[0].top_logprobs if resp.choices[0].logprobs else []
+            lp_content = resp.choices[0].logprobs.content if resp.choices[0].logprobs else []
+            top = lp_content[0].top_logprobs if lp_content else []
             logprob_map = {entry.token: entry.logprob for entry in top}
 
-            # Get first token of each option; fall back to -inf if not in top_logprobs
-            from openai import OpenAI  # tokenizer not available; use raw string match
             scores = []
-            for opt in options:
-                first_token = opt.split()[0] if opt else opt
-                # try exact match, then with leading space (common BPE artifact)
-                lp = logprob_map.get(f" {first_token}", logprob_map.get(first_token, -100.0))
+            for lbl in labels:
+                # Try "A", " A" (space-prefixed BPE variant)
+                lp = logprob_map.get(lbl, logprob_map.get(f" {lbl}", -100.0))
                 scores.append(lp)
 
-            # softmax over log-probs
             max_lp = max(scores)
             exps = [math.exp(lp - max_lp) for lp in scores]
             total = sum(exps)
