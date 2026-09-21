@@ -13,7 +13,7 @@ Portions derived from kev (https://github.com/jaredpalmer/kev), Copyright 2026 J
 import argparse, threading
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api import SystemOneRequest, to_record, to_answers, output_tokens
+from jev.api import SystemOneRequest, to_record, to_answers, output_tokens
 
 app = FastAPI(title="jev-server")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
@@ -50,12 +50,12 @@ def main():
     a = ap.parse_args()
 
     if a.mlx:
-        from mlx_backend import ScratchPredictor
+        from jev.mlx_backend import ScratchPredictor
         print(f"MLX backend: loading {a.mlx}")
         p = ScratchPredictor(a.mlx)
         STATE.update(label=a.mlx, predictor=p, tok=p.tokenizer)
     elif a.api:
-        from api_backend import APIPredictor
+        from jev.api_backend import APIPredictor
         if not a.api_model:
             ap.error("--api-model required with --api")
         print(f"API backend: {a.api} model={a.api_model}")

@@ -1,7 +1,10 @@
 [project]
-name = "jev-server"
+name = "jev-serve"
 version = "0.1.0"
+description = "Typed probabilistic decisions via logit readout — no text generation"
+readme = "README.md"
 requires-python = ">=3.11"
+license = { text = "Apache-2.0" }
 dependencies = [
     "fastapi>=0.115",
     "uvicorn>=0.30",
@@ -12,9 +15,16 @@ dependencies = [
 mlx = ["mlx-lm>=0.31"]
 api = ["openai>=1.0"]
 
+[project.scripts]
+jev-serve = "jev.serve:main"
+
+[project.urls]
+Repository = "https://github.com/rreinold/jev-serve"
+
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-py-modules = []
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["jev*"]
