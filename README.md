@@ -85,17 +85,21 @@ curl -X POST http://localhost:8008/v1/systemone \
 | `noul` | `noul` ∈ [0, 1] | Yes/no probability |
 | `score` | `score` (expected level) + `probabilities` | Ordinal rating |
 
-## Benchmark
+## Benchmark — Qwen3.8-27B · MLX · Apple M-series
 
-Same model (`Qwen3.8-27B`), same question, 20 products:
+20 products, same 4-option choice question, sequential, no batching.
 
-|  | jev-serve (logit readout) | LLM structured output |
+| Metric | Scratch (jev-serve) | Decoder (structured output) |
 |---|---|---|
 | Mean / product | **0.23 s** | 7.80 s |
-| 10 k products | **0.6 h** | 21.7 h |
-| Speedup | **34×** | — |
-| Probabilities | ✅ full distribution | ❌ point estimate |
-| Output tokens | 0 | ~23 |
+| P95 latency | **~0.31 s** | ~11.2 s |
+| Output tokens generated | **0** | ~23 |
+| Speedup | **34×** | baseline |
+| 10 k products (wall clock) | **0.6 h** | 21.7 h |
+| Probability distribution | **full (p per option)** | point estimate only |
+| Hallucinated fields possible | **no — schema-locked** | yes (observed) |
+
+Scratch mode runs _one_ forward pass and reads a single logit position. The decoder generates tokens one by one until EOS, then parses JSON. The gap widens with option count and output length.
 
 ## How it works
 
