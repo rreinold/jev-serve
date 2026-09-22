@@ -105,7 +105,7 @@ def to_record(req: SystemOneRequest):
         else:
             opts = [render(x) for x in q.criteria]
             meta.append({"id": qid, "type": "score", "legend": {str(i): render(x) for i, x in enumerate(q.criteria)}})
-        qs.append({"instr": instr, "options": opts, "label": 0})
+        qs.append({"instr": instr, "options": opts, "label": 0, "type": q.type})
     return {"state": render(req.state), "questions": qs}, meta
 
 
