@@ -19,11 +19,7 @@
 ## Install
 
 ```bash
-# default (MLX backend, Apple Silicon)
-uv pip install -e "."
-
-# + OpenAI-compatible API backend
-uv pip install -e ".[api]"
+uv sync
 ```
 
 ## Start
