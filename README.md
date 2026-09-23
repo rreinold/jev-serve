@@ -19,7 +19,7 @@
 ## Install
 
 ```bash
-uv sync
+uv sync --no-dev
 ```
 
 ## Start
