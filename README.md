@@ -11,7 +11,7 @@
 - **34× faster** than structured JSON generation (0.23s vs 7.80s per decision)
 - **Full probability distributions** — not a point estimate, a calibrated `p` per option
 - **Three question types**: `choice` (pick one), `noul` (0–1 probability), `score` (ordinal level)
-- **Two backends**: direct MLX inference or any OpenAI-compatible API (ollama, etc.)
+- **MLX by default**: direct Apple Silicon inference; swap to any OpenAI-compatible API with `--api`
 - Apache 2.0 — derived from [kev](https://github.com/jaredpalmer/kev) by Jared Palmer
 
 ---
@@ -19,21 +19,21 @@
 ## Install
 
 ```bash
-# MLX backend (Apple Silicon)
-uv pip install -e ".[mlx]"
+# default (MLX backend, Apple Silicon)
+uv pip install -e "."
 
-# OpenAI-compatible API backend
+# + OpenAI-compatible API backend
 uv pip install -e ".[api]"
 ```
 
 ## Start
 
 ```bash
-# MLX — direct inference on any local model
-jev-serve --mlx lmstudio-community/Qwen3.8-27B-MLX-6bit
+# MLX — direct inference on any local model (default backend)
+jev-serve lmstudio-community/Qwen3.8-27B-MLX-6bit
 
 # API — logit readout via ollama, LM Studio, OpenAI, etc.
-jev-serve --api http://localhost:11434/v1 --api-model gemma4:e4b-mlx
+jev-serve qwen/qwen3.8-27b --api http://localhost:11434/v1
 ```
 
 ## Usage
@@ -109,4 +109,5 @@ This is identical to what [openjev.com](https://openjev.com) does in the browser
 
 ## Attribution
 
-Portions derived from [kev](https://github.com/jaredpalmer/kev), Copyright 2026 Jared Palmer, Apache 2.0.
+- openjev.com
+-  [kev](https://github.com/jaredpalmer/kev), Copyright 2026 Jared Palmer, Apache 2.0.

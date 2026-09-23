@@ -4,15 +4,15 @@ version = "0.1.0"
 description = "Typed probabilistic decisions via logit readout — no text generation"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "Apache-2.0" }
+license = "Apache-2.0"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn>=0.30",
     "pydantic>=2.0",
+    "mlx-lm>=0.31; sys_platform == 'darwin'",
 ]
 
 [project.optional-dependencies]
-mlx = ["mlx-lm>=0.31"]
 api = ["openai>=1.0"]
 
 [project.scripts]

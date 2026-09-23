@@ -5,8 +5,8 @@ Two backends — pick one:
   --api URL --api-model ID  OpenAI-compatible API (LM Studio, ollama, etc.)
 
 Run:
-  uv run python serve.py --mlx lmstudio-community/Qwen3.8-27B-MLX-6bit
-  uv run python serve.py --api http://localhost:1234/v1 --api-model qwen/qwen3.8-27b
+  jev-serve lmstudio-community/Qwen3.8-27B-MLX-6bit
+  jev-serve qwen/qwen3.8-27b --api http://localhost:1234/v1
 
 Portions derived from kev (https://github.com/jaredpalmer/kev), Copyright 2026 Jared Palmer, Apache 2.0.
 """
@@ -42,26 +42,21 @@ def models():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mlx", default=None, metavar="MODEL_PATH", help="MLX model path or Hub id")
+    ap.add_argument("model", metavar="MODEL_PATH", help="MLX model path or Hub id")
     ap.add_argument("--api", default=None, metavar="BASE_URL", help="OpenAI-compatible API base URL")
-    ap.add_argument("--api-model", default=None, metavar="MODEL_ID")
     ap.add_argument("--api-key", default="local")
     ap.add_argument("--port", type=int, default=8008)
     a = ap.parse_args()
 
-    if a.mlx:
-        from jev.mlx_backend import ScratchPredictor
-        print(f"MLX backend: loading {a.mlx}")
-        p = ScratchPredictor(a.mlx)
-        STATE.update(label=a.mlx, predictor=p, tok=p.tokenizer)
-    elif a.api:
+    if a.api:
         from jev.api_backend import APIPredictor
-        if not a.api_model:
-            ap.error("--api-model required with --api")
-        print(f"API backend: {a.api} model={a.api_model}")
-        STATE.update(label=a.api_model, predictor=APIPredictor(a.api, a.api_model, a.api_key), tok=None)
+        print(f"API backend: {a.api} model={a.model}")
+        STATE.update(label=a.model, predictor=APIPredictor(a.api, a.model, a.api_key), tok=None)
     else:
-        ap.error("one of --mlx or --api is required")
+        from jev.mlx_backend import ScratchPredictor
+        print(f"MLX backend: loading {a.model}")
+        p = ScratchPredictor(a.model)
+        STATE.update(label=a.model, predictor=p, tok=p.tokenizer)
 
     print(f"serving on :{a.port}")
     import uvicorn
