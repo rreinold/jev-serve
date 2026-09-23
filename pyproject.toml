@@ -10,10 +10,8 @@ dependencies = [
     "uvicorn>=0.30",
     "pydantic>=2.0",
     "mlx-lm>=0.31; sys_platform == 'darwin'",
+    "openai>=1.0",
 ]
-
-[project.optional-dependencies]
-api = ["openai>=1.0"]
 
 [project.scripts]
 jev-serve = "jev.serve:main"
