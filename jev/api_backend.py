@@ -48,8 +48,10 @@ class APIPredictor:
             )
             total_tokens += resp.usage.prompt_tokens if resp.usage else 0
 
-            lp_content = resp.choices[0].logprobs.content if resp.choices[0].logprobs else []
-            top = lp_content[0].top_logprobs if lp_content else []
+            if not resp.choices[0].logprobs or not resp.choices[0].logprobs.content:
+                raise RuntimeError(f"Model {self.model!r} returned no logprobs — provider does not support logprobs for this model")
+            lp_content = resp.choices[0].logprobs.content
+            top = lp_content[0].top_logprobs
             logprob_map = {entry.token: entry.logprob for entry in top}
 
             scores = []
