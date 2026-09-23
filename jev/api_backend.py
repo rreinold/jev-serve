@@ -44,7 +44,7 @@ class APIPredictor:
                 max_tokens=1,
                 temperature=0,
                 logprobs=True,
-                top_logprobs=20,
+                top_logprobs=5,
             )
             total_tokens += resp.usage.prompt_tokens if resp.usage else 0
 
