@@ -19,7 +19,8 @@
 ## Install
 
 ```bash
-uv sync --no-dev
+uv sync                      # MLX (default)
+uv sync --extra api          # + OpenAI-compatible API backend
 ```
 
 ## Start
